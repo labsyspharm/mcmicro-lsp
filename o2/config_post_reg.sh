@@ -25,6 +25,8 @@ elif [ ${#tiff_paths[@]} -gt 1 ]; then
 fi
 tiff_path=${tiff_paths[0]}
 
+module load gcc tiff
+
 memory_gb=$(
     tiffinfo -0 "$tiff_path" \
     | awk '/Image Width/ { print int($3 * $6 / 1000000000 * 50 + 3) }'
