@@ -38,25 +38,20 @@ if [ $# -ne 1 ]; then
 fi
 sample_path="$1"
 
-if [ ! -d "$sample_path" -o ! -d "$sample_path/registration" ]; then
-    echo "Not an mcmicro sample directory or registration output not present"
+if [ ! -d "$sample_path" -o ! -d "$sample_path/raw" ]; then
+    echo "Not an mcmicro sample directory or raw images not present"
     exit 1
 fi
-tiff_paths=("$sample_path"/registration/*.ome.tif)
-if [ ${#tiff_paths[@]} -eq 0 ]; then
-    echo "Registration directory is empty"
-    exit 1
-elif [ ${#tiff_paths[@]} -gt 1 ]; then
-    echo "Can't handle multiple registration images"
+raw_paths=("$sample_path"/raw/*.rcpnl)
+if [ ${#raw_paths[@]} -eq 0 ]; then
+    echo "Raw directory is empty"
     exit 1
 fi
-tiff_path=${tiff_paths[0]}
-
-module load gcc tiff
+raw_path="${raw_paths[0]}"
 
 channel_gpx=$(
-    tiffinfo -0 "$tiff_path" \
-    | awk '/Image Width/ { print $3 * $6 / 1000000000 }'
+    stat -c %s "$raw_path" \
+    | awk '{ print $1 / 2 / 4 / 1000000000 }'
 )
 unmicst_gb=$(awk "{ print int($channel_gpx * $unmicst_scale + $unmicst_offset) }" <<< '')
 s3seg_gb=$(awk "{ print int($channel_gpx * $s3seg_scale + $s3seg_offset) }" <<< '')
