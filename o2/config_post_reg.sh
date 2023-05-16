@@ -27,17 +27,20 @@ tiff_path=${tiff_paths[0]}
 
 module load gcc tiff
 
-memory_gb=$(
+channel_gpx=$(
     tiffinfo -0 "$tiff_path" \
-    | awk '/Image Width/ { print int($3 * $6 / 1000000000 * 50 + 3) }'
+    | awk '/Image Width/ { print $3 * $6 / 1000000000 }'
 )
+unmicst_gb=$(awk "{ print int($channel_gpx * 50 + 3) }" <<< '')
+s3seg_gb=$(awk "{ print int($channel_gpx * 90 + 3) }" <<< '')
 
 cat <<EOF
 process {
   withName:worker {
-    cpus   = 4
-    time   = '12h'
-    memory = '${memory_gb}G'
+    memory = '${unmicst_gb}G'
+  }
+  withName:s3seg {
+    memory = '${s3seg_gb}G'
   }
 }
 EOF
