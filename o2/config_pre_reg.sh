@@ -6,6 +6,10 @@ shopt -s nullglob
 usage=$(cat <<EOF
 Usage: $(basename "$0") [-u] [-s] SAMPLE_DIRECTORY
 
+Generates an mcmicro configuration file with resource limits for
+segmentation. Use this script if you have not yet run registration and
+only have raw .rcpnl files. Otherwise see config_post_reg.sh instead.
+
   -u    Set this when using unmicst --scalingFactor 0.5
   -s    Set this when using s3segmenter-large version
 EOF

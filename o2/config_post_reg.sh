@@ -6,6 +6,10 @@ shopt -s nullglob
 usage=$(cat <<EOF
 Usage: $(basename "$0") [-u] [-s] SAMPLE_DIRECTORY
 
+Generates an mcmicro configuration file with resource limits for
+segmentation. Use this script if you have run registration and have a
+stitched .ome.tif file. Otherwise see config_pre_reg.sh instead.
+
   -u    Set this when using unmicst --scalingFactor 0.5
   -s    Set this when using s3segmenter-large version
 EOF
