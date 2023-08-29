@@ -67,11 +67,12 @@ s3seg_gb=$(awk "{ print int($channel_gpx * $s3seg_scale + $s3seg_offset) }" <<< 
 
 cat <<EOF
 process {
+  errorStrategy { task.exitStatus == 125 ? 'retry' : 'terminate' }
   withName:worker {
-    memory = '${unmicst_gb}G'
+    memory { ${unmicst_gb}.GB * task.attempt }
   }
   withName:s3seg {
-    memory = '${s3seg_gb}G'
+    memory { ${s3seg_gb}.GB * task.attempt }
   }
 }
 EOF
