@@ -23,15 +23,15 @@ s3seg_offset=3
 
 while getopts "ush" opt; do
     case "$opt" in
-	u)
-	    unmicst_scale=30
-	    ;;
-	s)
-	    s3seg_scale=8
-	    s3seg_offset=13
-	    ;;
-	h)
-	    echo "$usage"
+        u)
+            unmicst_scale=30
+            ;;
+        s)
+            s3seg_scale=8
+            s3seg_offset=13
+            ;;
+        h)
+            echo "$usage"
             exit 1
     esac
 done
