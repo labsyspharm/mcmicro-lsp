@@ -71,10 +71,10 @@ process {
   errorStrategy { task.exitStatus == 125 ? 'retry' : 'terminate' }
   maxRetries 2
   withName:worker {
-    memory { ${unmicst_gb}.GB * task.attempt }
+    memory { ${unmicst_gb}.GB * (1 + (task.attempt - 1) / 2) }
   }
   withName:s3seg {
-    memory { ${s3seg_gb}.GB * task.attempt }
+    memory { ${s3seg_gb}.GB * (1 + (task.attempt - 1) / 2) }
   }
 }
 EOF
