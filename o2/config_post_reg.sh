@@ -8,7 +8,7 @@ Usage: $(basename "$0") [-u] [-s] SAMPLE_DIRECTORY
 
 Generates an mcmicro configuration file with resource limits for
 segmentation. Use this script if you have run registration and have a
-stitched .ome.tif file. Otherwise see config_pre_reg.sh instead.
+stitched .ome.tif file. Otherwise see config_pre_reg.sh .
 
   -u    Set this when using unmicst --scalingFactor 0.5
   -s    Set this when using s3segmenter-large version
@@ -62,8 +62,8 @@ channel_gpx=$(
     tiffinfo -0 "$tiff_path" \
     | awk '/Image Width/ { print $3 * $6 / 1000000000 }'
 )
-unmicst_gb=$(awk "{ print int($channel_gpx * $unmicst_scale + $unmicst_offset) }" <<< '')
-s3seg_gb=$(awk "{ print int($channel_gpx * $s3seg_scale + $s3seg_offset) }" <<< '')
+unmicst_gb=$(awk "{ print int($channel_gpx * $unmicst_scale + $unmicst_offset + 1) }" <<< '')
+s3seg_gb=$(awk "{ print int($channel_gpx * $s3seg_scale + $s3seg_offset + 1) }" <<< '')
 
 cat <<EOF
 process {

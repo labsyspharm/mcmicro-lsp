@@ -7,8 +7,8 @@ usage=$(cat <<EOF
 Usage: $(basename "$0") [-u] [-s] SAMPLE_DIRECTORY
 
 Generates an mcmicro configuration file with resource limits for
-segmentation. Use this script if you have not yet run registration and
-only have raw .rcpnl files. Otherwise see config_post_reg.sh instead.
+stitching and segmentation. Use this script if you have not yet run
+registration and only have raw .rcpnl files. Otherwise see config_post_reg.sh .
 
   -u    Set this when using unmicst --scalingFactor 0.5
   -s    Set this when using s3segmenter-large version
@@ -16,6 +16,8 @@ EOF
 )
 
 sample_path=""
+ashlar_scale=2
+ashlar_offset=2.5
 unmicst_scale=50
 unmicst_offset=3
 s3seg_scale=90
@@ -51,19 +53,24 @@ if [ ${#raw_paths[@]} -eq 0 ]; then
     echo "Raw directory is empty"
     exit 1
 fi
-raw_path="${raw_paths[0]}"
 
 channel_gpx=$(
-    stat -c %s "$raw_path" \
+    stat -L -c %s "${raw_paths[@]}" \
+    | sort -n \
+    | tail -1 \
     | awk '{ print $1 / 2 / 4 / 1000000000 }'
 )
-unmicst_gb=$(awk "{ print int($channel_gpx * $unmicst_scale + $unmicst_offset) }" <<< '')
-s3seg_gb=$(awk "{ print int($channel_gpx * $s3seg_scale + $s3seg_offset) }" <<< '')
+ashlar_gb=$(awk "{ print int($channel_gpx * $ashlar_scale + $ashlar_offset + 1) }" <<< '')
+unmicst_gb=$(awk "{ print int($channel_gpx * $unmicst_scale + $unmicst_offset + 1) }" <<< '')
+s3seg_gb=$(awk "{ print int($channel_gpx * $s3seg_scale + $s3seg_offset + 1) }" <<< '')
 
 cat <<EOF
 process {
   errorStrategy { task.exitStatus == 125 ? 'retry' : 'terminate' }
   maxRetries 2
+  withName:ashlar {
+    memory { ${ashlar_gb}.GB * task.attempt }
+  }
   withName:worker {
     memory { ${unmicst_gb}.GB * task.attempt }
   }
