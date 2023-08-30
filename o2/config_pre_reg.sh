@@ -66,6 +66,7 @@ s3seg_gb=$(awk "{ print int($channel_gpx * $s3seg_scale + $s3seg_offset + 1) }" 
 
 cat <<EOF
 process {
+  cpus 1
   errorStrategy { task.exitStatus == 125 ? 'retry' : 'terminate' }
   maxRetries 2
   withName:ashlar {
