@@ -16,6 +16,8 @@ EOF
 )
 
 sample_path=""
+basic_scale=5
+basic_offset=8
 ashlar_scale=2
 ashlar_offset=2.5
 unmicst_scale=50
@@ -60,23 +62,27 @@ channel_gpx=$(
     | tail -1 \
     | awk '{ print $1 / 2 / 4 / 1000000000 }'
 )
+basic_gb=$(awk "{ print int($channel_gpx * $basic_scale + $basic_offset + 1) }" <<< '')
 ashlar_gb=$(awk "{ print int($channel_gpx * $ashlar_scale + $ashlar_offset + 1) }" <<< '')
 unmicst_gb=$(awk "{ print int($channel_gpx * $unmicst_scale + $unmicst_offset + 1) }" <<< '')
 s3seg_gb=$(awk "{ print int($channel_gpx * $s3seg_scale + $s3seg_offset + 1) }" <<< '')
 
 cat <<EOF
 process {
-  cpus 1
-  errorStrategy { task.exitStatus == 125 ? 'retry' : 'terminate' }
-  maxRetries 2
+  cpus = 1
+  maxRetries = 2
+  errorStrategy = { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+  withName:illumination {
+    memory = { ${basic_gb}.GB * (1 + (task.attempt - 1) / 2) }
+  }
   withName:ashlar {
-    memory { ${ashlar_gb}.GB * (1 + (task.attempt - 1) / 2) }
+    memory = { ${ashlar_gb}.GB * (1 + (task.attempt - 1) / 2) }
   }
   withName:worker {
-    memory { ${unmicst_gb}.GB * (1 + (task.attempt - 1) / 2) }
+    memory = { ${unmicst_gb}.GB * (1 + (task.attempt - 1) / 2) }
   }
   withName:s3seg {
-    memory { ${s3seg_gb}.GB * (1 + (task.attempt - 1) / 2) }
+    memory = { ${s3seg_gb}.GB * (1 + (task.attempt - 1) / 2) }
   }
 }
 EOF
