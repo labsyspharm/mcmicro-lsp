@@ -66,6 +66,10 @@ unmicst_gb=$(awk "{ print int($channel_gpx * $unmicst_scale + $unmicst_offset + 
 s3seg_gb=$(awk "{ print int($channel_gpx * $s3seg_scale + $s3seg_offset + 1) }" <<< '')
 
 cat <<EOF
+manifest {
+  nextflowVersion = '!>=23.04.3'
+}
+
 process {
   cpus = 1
   maxRetries = 2
