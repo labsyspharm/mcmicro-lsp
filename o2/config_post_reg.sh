@@ -56,6 +56,7 @@ elif [ ${#tiff_paths[@]} -gt 1 ]; then
 fi
 tiff_path=${tiff_paths[0]}
 
+module purge
 module load gcc tiff
 
 channel_gpx=$(
