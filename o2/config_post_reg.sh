@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
-shopt -s nullglob
+shopt -s nullglob extglob
 
 usage=$(cat <<EOF
 Usage: $(basename "$0") [-u] [-s] SAMPLE_DIRECTORY
@@ -46,7 +46,7 @@ if [ ! -d "$sample_path" -o ! -d "$sample_path/registration" ]; then
     echo "Not an mcmicro sample directory or registration output not present"
     exit 1
 fi
-tiff_paths=("$sample_path"/registration/*.ome.tif)
+tiff_paths=("$sample_path"/registration/*.ome.@(tif|tiff))
 if [ ${#tiff_paths[@]} -eq 0 ]; then
     echo "Registration directory is empty"
     exit 1
