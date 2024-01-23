@@ -3,8 +3,23 @@
 set -euo pipefail
 shopt -s nullglob extglob
 
+scriptname=$(basename "$0")
+
+error ()
+{
+    # Emit an error message that will be readable from the command line, but
+    # also produces the same message as an exception in Nextflow if the
+    # generated config is used sight unseen.
+    msg="$1"
+    echo "ERROR: $msg" >&2
+    cat <<EOF
+process.memory = { throw new nextflow.exception.ConfigParseException('There was an error running $scriptname: $msg') }
+EOF
+    exit 1
+}
+
 usage=$(cat <<EOF
-Usage: $(basename "$0") [-u] [-s] SAMPLE_DIRECTORY
+Usage: $scriptname [-u] [-s] SAMPLE_DIRECTORY
 
 Generates an mcmicro configuration file with resource limits for
 segmentation. Use this script if you have run registration and have a
@@ -37,22 +52,22 @@ while getopts "ush" opt; do
 done
 shift "$(($OPTIND -1))"
 if [ $# -ne 1 ]; then
-    echo "$usage"
+    echo "$usage" >&2
+    # If stdout is not a tty (as when redirecting to a file), emit a valid
+    # Nextflow config that displays an error.
+    test -t 1 || echo "process.memory = { throw new nextflow.exception.ConfigParseException('There was an error running $scriptname: Invalid options') }"
     exit 1
 fi
 sample_path="$1"
 
 if [ ! -d "$sample_path" -o ! -d "$sample_path/registration" ]; then
-    echo "Not an mcmicro sample directory or registration output not present"
-    exit 1
+    error "Not an mcmicro sample directory or registration output not present"
 fi
 tiff_paths=("$sample_path"/registration/*.ome.@(tif|tiff))
 if [ ${#tiff_paths[@]} -eq 0 ]; then
-    echo "Registration directory is empty"
-    exit 1
+    error "Registration directory is empty"
 elif [ ${#tiff_paths[@]} -gt 1 ]; then
-    echo "Can't handle multiple registration images"
-    exit 1
+    error "Can't handle multiple registration images"
 fi
 tiff_path=${tiff_paths[0]}
 
