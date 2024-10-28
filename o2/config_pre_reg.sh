@@ -3,8 +3,27 @@
 set -euo pipefail
 shopt -s nullglob
 
+scriptname=$(basename "$0")
+
+#######################################
+# Emit an error message that will be readable from the command line, but also
+# produces the same message as an exception in Nextflow if stdin is redirected
+# into a nextflow config file.
+# Arguments:
+# 1: Error message
+#######################################
+error ()
+{
+    msg="$1"
+    echo "$scriptname: $msg" >&2
+    # If stdout is not a tty (as when redirecting to a file), emit a valid
+    # Nextflow config that displays an error.
+    test -t 1 || echo "process.memory = { throw new nextflow.exception.ConfigParseException('There was an error running $scriptname: $msg') }"
+    exit 1
+}
+
 usage=$(cat <<EOF
-Usage: $(basename "$0") [-u] [-s] SAMPLE_DIRECTORY
+Usage: $scriptname [-u] [-s] SAMPLE_DIRECTORY
 
 Generates an mcmicro configuration file with resource limits for
 stitching and segmentation. Use this script if you have not yet run
@@ -26,7 +45,7 @@ unmicst_offset=3
 s3seg_scale=90
 s3seg_offset=3
 
-while getopts "ush" opt; do
+while getopts ":ush" opt; do
     case "$opt" in
         u)
             unmicst_scale=30
@@ -38,23 +57,25 @@ while getopts "ush" opt; do
         h)
             echo "$usage"
             exit 1
+            ;;
+        *)
+            error "Invalid option: -$OPTARG"
     esac
 done
 shift "$(($OPTIND -1))"
 if [ $# -ne 1 ]; then
-    echo "$usage"
-    exit 1
+    echo "$usage" >&2
+    echo >&2
+    error "Please specify the path to an mcmicro sample directory"
 fi
 sample_path="$1"
 
 if [ ! -d "$sample_path" -o ! -d "$sample_path/raw" ]; then
-    echo "Not an mcmicro sample directory or raw images not present"
-    exit 1
+    error "Not an mcmicro sample directory or raw images not present"
 fi
 raw_paths=("$sample_path"/raw/*.{rcpnl,czi})
 if [ ${#raw_paths[@]} -eq 0 ]; then
-    echo "Raw directory is empty"
-    exit 1
+    error "Raw directory is empty"
 fi
 
 channel_gpx=$(

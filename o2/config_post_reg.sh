@@ -5,16 +5,20 @@ shopt -s nullglob extglob
 
 scriptname=$(basename "$0")
 
+#######################################
+# Emit an error message that will be readable from the command line, but also
+# produces the same message as an exception in Nextflow if stdin is redirected
+# into a nextflow config file.
+# Arguments:
+# 1: Error message
+#######################################
 error ()
 {
-    # Emit an error message that will be readable from the command line, but
-    # also produces the same message as an exception in Nextflow if the
-    # generated config is used sight unseen.
     msg="$1"
-    echo "ERROR: $msg" >&2
-    cat <<EOF
-process.memory = { throw new nextflow.exception.ConfigParseException('There was an error running $scriptname: $msg') }
-EOF
+    echo "$scriptname: $msg" >&2
+    # If stdout is not a tty (as when redirecting to a file), emit a valid
+    # Nextflow config that displays an error.
+    test -t 1 || echo "process.memory = { throw new nextflow.exception.ConfigParseException('There was an error running $scriptname: $msg') }"
     exit 1
 }
 
@@ -36,7 +40,7 @@ unmicst_offset=3
 s3seg_scale=90
 s3seg_offset=3
 
-while getopts "ush" opt; do
+while getopts ":ush" opt; do
     case "$opt" in
         u)
             unmicst_scale=30
@@ -48,15 +52,16 @@ while getopts "ush" opt; do
         h)
             echo "$usage"
             exit 1
+            ;;
+        *)
+            error "Invalid option: -$OPTARG"
     esac
 done
 shift "$(($OPTIND -1))"
 if [ $# -ne 1 ]; then
     echo "$usage" >&2
-    # If stdout is not a tty (as when redirecting to a file), emit a valid
-    # Nextflow config that displays an error.
-    test -t 1 || echo "process.memory = { throw new nextflow.exception.ConfigParseException('There was an error running $scriptname: Invalid options') }"
-    exit 1
+    echo >&2
+    error "Please specify the path to an mcmicro sample directory"
 fi
 sample_path="$1"
 
@@ -71,8 +76,11 @@ elif [ ${#tiff_paths[@]} -gt 1 ]; then
 fi
 tiff_path=${tiff_paths[0]}
 
-module purge
-module load gcc tiff
+if type -t module > /dev/null; then
+    # Load 'tiff' module for 'tiffinfo' on O2.
+    module purge
+    module load gcc tiff
+fi
 
 channel_gpx=$(
     tiffinfo -0 "$tiff_path" \
