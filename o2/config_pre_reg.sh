@@ -8,7 +8,8 @@ Usage: $(basename "$0") [-u] [-s] SAMPLE_DIRECTORY
 
 Generates an mcmicro configuration file with resource limits for
 stitching and segmentation. Use this script if you have not yet run
-registration and only have raw .rcpnl files. Otherwise see config_post_reg.sh .
+registration and only have raw .rcpnl or .czi files. Otherwise see
+config_post_reg.sh .
 
   -u    Set this when using unmicst --scalingFactor 0.5
   -s    Set this when using s3segmenter-large version
@@ -50,7 +51,7 @@ if [ ! -d "$sample_path" -o ! -d "$sample_path/raw" ]; then
     echo "Not an mcmicro sample directory or raw images not present"
     exit 1
 fi
-raw_paths=("$sample_path"/raw/*.rcpnl)
+raw_paths=("$sample_path"/raw/*.{rcpnl,czi})
 if [ ${#raw_paths[@]} -eq 0 ]; then
     echo "Raw directory is empty"
     exit 1
