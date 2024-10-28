@@ -77,6 +77,7 @@ process {
   maxRetries = 2
   errorStrategy = { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
   withName:illumination {
+    cpus = 4
     memory = { ${basic_gb}.GB * (1 + (task.attempt - 1) / 2) }
   }
   withName:ashlar {
