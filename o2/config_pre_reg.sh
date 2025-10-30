@@ -3,6 +3,7 @@
 set -euo pipefail
 shopt -s nullglob
 
+base=$(realpath "$(dirname "$0")")
 scriptname=$(basename "$0")
 
 #######################################
@@ -27,8 +28,8 @@ Usage: $scriptname [-u] [-s] SAMPLE_DIRECTORY
 
 Generates an mcmicro configuration file with resource limits for
 stitching and segmentation. Use this script if you have not yet run
-registration and only have raw .rcpnl or .czi files. Otherwise see
-config_post_reg.sh .
+registration and only have raw .rcpnl, .czi, or ORION .pysed.ome.tif
+files. Otherwise see config_post_reg.sh .
 
   -u    Set this when using unmicst --scalingFactor 0.5
   -s    Set this when using s3segmenter-large version
@@ -73,17 +74,21 @@ sample_path="$1"
 if [ ! -d "$sample_path" -o ! -d "$sample_path/raw" ]; then
     error "Not an mcmicro sample directory or raw images not present"
 fi
-raw_paths=("$sample_path"/raw/*.{rcpnl,czi})
+raw_paths=("$sample_path"/raw/*.{rcpnl,czi,pysed.ome.tif})
 if [ ${#raw_paths[@]} -eq 0 ]; then
     error "Raw directory is empty"
 fi
 
-channel_gpx=$(
-    stat -L -c %s "${raw_paths[@]}" \
-    | sort -n \
-    | tail -1 \
-    | awk '{ print $1 / 2 / 4 / 1000000000 }'
-)
+if [[ ${raw_paths[0]: -14} == '.pysed.ome.tif' ]]; then
+    channel_gpx=$("$base"/ome-tiff-gpx.py "${raw_paths[0]}")
+else
+    channel_gpx=$(
+        stat -L -c %s "${raw_paths[@]}" \
+        | sort -n \
+        | tail -1 \
+        | awk '{ print $1 / 2 / 4 / 1000000000 }'
+    )
+fi
 basic_gb=$(awk "{ print int($channel_gpx * $basic_scale + $basic_offset + 1) }" <<< '')
 ashlar_gb=$(awk "{ print int($channel_gpx * $ashlar_scale + $ashlar_offset + 1) }" <<< '')
 unmicst_gb=$(awk "{ print int($channel_gpx * $unmicst_scale + $unmicst_offset + 1) }" <<< '')
