@@ -32,6 +32,5 @@ out_path=/n/groups/lsp/mcmicro/singularity/$org-$cont-$tag.img
 echo "Container: $url"
 echo "Destination: $out_path"
 
-simg="/n/groups/lsp/mcmicro/singularity/singularity-3.11.0.img"
-cmd="singularity run -B /n/groups $simg pull $out_path $url"
+cmd="apptainer pull $out_path $url"
 sg 'hits lsp-analysis' "$cmd"
