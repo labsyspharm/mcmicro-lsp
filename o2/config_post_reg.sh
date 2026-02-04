@@ -99,10 +99,10 @@ process {
   maxRetries = 2
   errorStrategy = { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
   withName:worker {
-    memory = { ${unmicst_gb}.GB * (1 + (task.attempt - 1) / 2) }
+    memory = { ${unmicst_gb}.GB * task.attempt }
   }
   withName:s3seg {
-    memory = { ${s3seg_gb}.GB * (1 + (task.attempt - 1) / 2) }
+    memory = { ${s3seg_gb}.GB * task.attempt }
   }
 }
 EOF

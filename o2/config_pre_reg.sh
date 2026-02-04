@@ -105,16 +105,16 @@ process {
   errorStrategy = { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
   withName:illumination {
     cpus = 4
-    memory = { ${basic_gb}.GB * (1 + (task.attempt - 1) / 2) }
+    memory = { ${basic_gb}.GB * task.attempt }
   }
   withName:ashlar {
-    memory = { ${ashlar_gb}.GB * (1 + (task.attempt - 1) / 2) }
+    memory = { ${ashlar_gb}.GB * task.attempt }
   }
   withName:worker {
-    memory = { ${unmicst_gb}.GB * (1 + (task.attempt - 1) / 2) }
+    memory = { ${unmicst_gb}.GB * task.attempt }
   }
   withName:s3seg {
-    memory = { ${s3seg_gb}.GB * (1 + (task.attempt - 1) / 2) }
+    memory = { ${s3seg_gb}.GB * task.attempt }
   }
 }
 EOF
