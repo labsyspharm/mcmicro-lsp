@@ -74,7 +74,7 @@ sample_path="$1"
 if [ ! -d "$sample_path" -o ! -d "$sample_path/raw" ]; then
     error "Not an mcmicro sample directory or raw images not present"
 fi
-raw_paths=("$sample_path"/raw/*.{rcpnl,czi,pysed.ome.tif})
+raw_paths=("$sample_path"/raw/*.{rcpnl,czi,lif,pysed.ome.tif})
 if [ ${#raw_paths[@]} -eq 0 ]; then
     error "Raw directory is empty"
 fi
