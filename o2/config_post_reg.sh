@@ -39,6 +39,8 @@ unmicst_scale=50
 unmicst_offset=3
 s3seg_scale=90
 s3seg_offset=3
+mcquant_scale=8.4
+mcquant_offset=4
 
 while getopts ":ush" opt; do
     case "$opt" in
@@ -88,6 +90,7 @@ channel_gpx=$(
 )
 unmicst_gb=$(awk "{ print int($channel_gpx * $unmicst_scale + $unmicst_offset + 1) }" <<< '')
 s3seg_gb=$(awk "{ print int($channel_gpx * $s3seg_scale + $s3seg_offset + 1) }" <<< '')
+mcquant_gb=$(awk "{ print int($channel_gpx * $mcquant_scale + $mcquant_offset + 1) }" <<< '')
 
 cat <<EOF
 manifest {
@@ -103,6 +106,9 @@ process {
   }
   withName:s3seg {
     memory = { ${s3seg_gb}.GB * task.attempt }
+  }
+  withName:mcquant {
+    memory = { ${mcquant_gb}.GB * task.attempt }
   }
 }
 EOF
