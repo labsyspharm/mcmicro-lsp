@@ -1,0 +1,15 @@
+#!/usr/bin/bash
+
+if [ ! -e markers.csv ]; then
+  echo "ERROR: This doesn't look like an mcmicro 1.0 project directory (markers.csv was not found)" >&2
+  exit 1;
+fi
+
+module purge
+module load java
+
+base="$(dirname $(realpath $0))"
+
+export NXF_WORK=/tmp
+
+nextflow run "$base"/sortfiles.nf
