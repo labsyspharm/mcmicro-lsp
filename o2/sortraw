@@ -12,4 +12,4 @@ base="$(dirname $(realpath $0))"
 
 export NXF_WORK=/tmp
 
-nextflow run "$base"/sortfiles.nf
+nextflow run "$base"/sortraw.nf
