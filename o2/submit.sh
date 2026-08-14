@@ -29,7 +29,10 @@ echo
 cd "$in"
 nextflow run labsyspharm/mcmicro -profile O2LSP --in .
 
-# Make a copy of the nextflow reports for future planning.
-if [ -e pipeline_info/execution_trace_*.txt ]; then
-  cp -r pipeline_info /n/groups/lsp/mcmicro/reports/$USER-$(date -Iseconds)
+# Make a copy of qc logs and nextflow reports for future planning.
+if [ -e qc/provenance ] || compgen -G 'pipeline_info/*' > /dev/null; then
+  dest="/n/groups/lsp/mcmicro/reports/$USER-$(date -Iseconds)"
+  mkdir -p "$dest"
+  cp -r qc/provenance pipeline_info/* "$dest" 2>/dev/null
+  echo "Copied provenance and pipeline reports to $dest"
 fi
