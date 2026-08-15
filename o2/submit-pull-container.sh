@@ -1,4 +1,9 @@
 #!/bin/bash
+#SBATCH -p priority
+#SBATCH --mem 16G
+#SBATCH -t 0-12
+#SBATCH -J pull-container
+#SBATCH -o /n/groups/lsp/mcmicro/singularity/slurm-pull-container-%j.o
 
 set -euo pipefail
 
@@ -32,5 +37,13 @@ out_path=/n/groups/lsp/mcmicro/singularity/$org-$cont-$tag.img
 echo "Container: $url"
 echo "Destination: $out_path"
 
-cmd="apptainer pull $out_path $url"
+# Set apptainer tmpdir to avoid using the default of ~/.apptainer (which would
+# blow up the user's home dir quota).
+export APPTAINER_TMPDIR=$(mktemp -d -p /n/groups/lsp/mcmicro/singularity/ pull-tmp.XXXXXXXXXX)
+echo Setting APPTAINER_TMPDIR=$APPTAINER_TMPDIR
+
+cmd="apptainer pull --disable-cache $out_path $url"
 sg 'hits lsp-analysis' "$cmd"
+
+# apptainer should have already cleaned up everything inside this dir.
+rmdir $APPTAINER_TMPDIR
