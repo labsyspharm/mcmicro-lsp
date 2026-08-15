@@ -20,6 +20,8 @@ module load java
 export NXF_JVM_ARGS=-Xmx1g
 # Run the latest version of nextflow that mcmicro 1.0 is compatible with.
 export NXF_VER=25.10.7
+# Disable cursor positioning and color codes in log output.
+export NXF_ANSI_LOG=false
 # Set the workdir to a standard location in the user's scratch directory.
 export NXF_WORK=/n/scratch/users/"${USER:0:1}/$USER"/nextflow-work
 
