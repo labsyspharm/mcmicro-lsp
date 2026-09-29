@@ -11,6 +11,7 @@ if [ ! -e "$in/markers.csv" ]; then
   echo "ERROR: $0: Input directory '$in' doesn't look like an mcmicro 1.0 project directory (markers.csv was not found there)" >&2
   exit 1;
 fi
+shift
 
 # Load the java module which is required for nextflow.
 module purge
@@ -29,7 +30,7 @@ export NXF_WORK=/n/scratch/users/"${USER:0:1}/$USER"/nextflow-work
 echo "Launching mcmicro in $in"
 echo
 cd "$in"
-nextflow run labsyspharm/mcmicro -profile O2LSP --in .
+nextflow run labsyspharm/mcmicro -profile O2LSP --in . "$@"
 
 # Make a copy of qc logs and nextflow reports for future planning.
 if [ -e qc/provenance ] || compgen -G 'pipeline_info/*' > /dev/null; then
