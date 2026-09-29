@@ -11,5 +11,6 @@ module load java
 base="$(dirname $(realpath $0))"
 
 export NXF_WORK=/tmp
+export NXF_VER=25.10.7
 
 nextflow run "$base"/sortraw.nf
